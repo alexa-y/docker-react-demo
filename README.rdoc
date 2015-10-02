@@ -1,7 +1,7 @@
 == System Dependencies
 
 * phantomjs
-  * Simply `brew install phantomjs` on OSX
+  * Simply <tt>brew install phantomjs</tt> on OSX
 
 == Basic Setup Instructions
 
