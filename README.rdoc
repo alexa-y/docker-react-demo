@@ -1,28 +1,55 @@
-== README
+== System Dependencies
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+* phantomjs
+  * Simply `brew install phantomjs` on OSX
 
-Things you may want to cover:
+== Basic Setup Instructions
 
-* Ruby version
+While this repo already has feature specs (via capybara)
+ready to run in a headless environment, below is a
+list of steps needed to apply this to other apps:
 
-* System dependencies
+* Add <tt>capybara</tt>, <tt>selenium-webdriver</tt>, <tt>database_cleaner</tt>, <tt>poltergeist</tt>, and <tt>rack_session_access</tt>
+* Add <tt>require 'rack_session_access/capybara'</tt> to spec/rails_helper.rb
+* spec/rails_helper.rb should also have the following snippet inside of <tt>RSpec.configure</tt>
 
-* Configuration
+    config.use_transactional_fixtures = false
 
-* Database creation
+    config.before(:suite) do
+      Capybara.javascript_driver = ENV['DRIVER'].try(:to_sym) || :poltergeist
+      DatabaseCleaner.clean_with(:truncation)
+    end
 
-* Database initialization
+    config.before(:each) do |example|
+      DatabaseCleaner.strategy = example.metadata[:js] ? :truncation : :transaction
+      DatabaseCleaner.start
+    end
 
-* How to run the test suite
+    config.after(:each) do
+      DatabaseCleaner.clean
+    end
 
-* Services (job queues, cache servers, search engines, etc.)
+* Add <tt>require 'capybara/poltergeist'</tt> to spec/spec_helper.rb
+* In the Dockerfile, an installation of phantomjs should occur.
 
-* Deployment instructions
+    ENV PHANTOMJS_VERSION 1.9.7
+    RUN apt-get install -y nodejs vim git wget libfreetype6 libfontconfig bzip2 && \
+      mkdir -p /srv/var && \
+      wget -q --no-check-certificate -O /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 && \
+      tar -xjf /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C /tmp && \
+      rm -f /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 && \
+      mv /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/ /srv/var/phantomjs && \
+      ln -s /srv/var/phantomjs/bin/phantomjs /usr/bin/phantomjs && \
+      git clone https://github.com/n1k0/casperjs.git /srv/var/casperjs && \
+      ln -s /srv/var/casperjs/bin/casperjs /usr/bin/casperjs && \
+      apt-get autoremove -y && \
+      apt-get clean all
 
-* ...
+* Add <tt>config.middleware.use RackSessionAccess::Middleware</tt> to config/environments/test.rb
+* Copy vendor/assets/javascripts/es5-shim.js to new app.
+  This file also needs to be added to the javascript manifest.  It should come before
+  the first react library.
 
+== Additional Notes
 
-Please feel free to use a different markup language if you do not plan to run
-<tt>rake doc:app</tt>.
+* To set session variables, use <tt>page.set_rack_session({ account_key: account.key })</tt> in a feature spec context.
