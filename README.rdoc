@@ -53,3 +53,4 @@ list of steps needed to apply this to other apps:
 == Additional Notes
 
 * To set session variables, use <tt>page.set_rack_session({ account_key: account.key })</tt> in a feature spec context.
+* By default, rspec will run features in headless mode using the poltergeist driver.  If selenium is desired for the visual aspect, start rspec with the DRIVER env variable set.  <tt>DRIVER=selenium rspec spec/features</tt>
