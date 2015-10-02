@@ -1,0 +1,16 @@
+development: &default
+  adapter: postgresql
+  encoding: utf8
+  database: canvas_development
+  pool: 5
+  username: postgres
+  password:
+  host: <%= ENV['DB_PORT_5432_TCP_ADDR'] %>
+
+test:
+  <<: *default
+  database: canvas_test
+
+production:
+  <<: *default
+  database: canvas_production
