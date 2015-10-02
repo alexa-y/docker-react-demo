@@ -46,6 +46,7 @@ group :development, :test do
   gem 'selenium-webdriver'
   gem 'database_cleaner'
   gem 'poltergeist'
+  gem 'rack_session_access'
 end
 
 gem 'pg'

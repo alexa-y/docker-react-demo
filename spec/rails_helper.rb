@@ -5,6 +5,7 @@ require File.expand_path('../../config/environment', __FILE__)
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 require 'spec_helper'
 require 'rspec/rails'
+require 'rack_session_access/capybara'
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -36,7 +37,7 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = false
 
   config.before(:suite) do
-    Capybara.javascript_driver = :poltergeist
+    Capybara.javascript_driver = ENV['DRIVER'].try(:to_sym) || :poltergeist
     DatabaseCleaner.clean_with(:truncation)
   end
 
